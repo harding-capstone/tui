@@ -1,0 +1,19 @@
+language: java
+jdk:
+- oraclejdk11
+- openjdk11
+sudo: false
+notifications:
+  email: false
+  slack:
+    secure: ljF0hc3Sq/ePnhdpre4Xkx7IasxTrwhCO8tENRPcDEnJFWjsEaxL3PF9gquKVpNn91pSDxoVWTy5zattRDmIBZ6BuRbIYdxcqdXyebN+o7ZebWnOOeGMiNASB+bFSBJZJnBxuxxcxfdmdNV00BjdzgVWQOhX4yJZaXg50JtG1OqrV8hX5yn1t+TeHsd40I5Hcj9E+U5sG3TSsKdhJjd3RkAQ7iNLM1PZq4a7tojWcgqu+4OVPWwiNLS/IsFUNw2iF/MEZ1RwXBbZCsPD4seZJqkNGlKm3c1pZlOrTnXTJUrxsDPzkZ/O1TIjrTfHL7sQaomeY8eKoEOgxZBebMN/uVHW91Y/3H4d7XdSvM5/Hmnynk6G32oJqOSOtAC/r0w7mujRTp2wykQnQikygS9AWU51J0oEvj1bX3dEi+Zj2HBCebbnAmK/tSK7DupshAZYEAbPAPx9FyD0uXi4+sfXPp3Lwzp4O1QbbEPCa+YGSyDO7gtMYiS9ulmWwkthPnC6zaFc1vdVYxSbvcpgv7mr/oYvB1YmsJJ9MRekk5giiA20YFoyi+Cu7j/6z92MxOcofF8Y24vnePYJrqnn5G30OR5sulSAmHyWzEXQ80KyYQojaSLBmWL8TH2qNp7tkzYs0Sme1mDPFBuv1ljrJQbQE/ox7Kx/+DwgPQcEzIdOB8g=
+after_success:
+- mvn jacoco:report coveralls:report
+deploy:
+  provider: script
+  script: mvn deploy --settings travis-settings.xml -DskipTests=true -B
+  on:
+    jdk: oraclejdk11
+cache:
+  directories:
+  - "$HOME/.m2"
