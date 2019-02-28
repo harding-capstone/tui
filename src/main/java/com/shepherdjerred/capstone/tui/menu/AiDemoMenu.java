@@ -33,6 +33,9 @@ public class AiDemoMenu implements Menu {
     if (input.equals("1")) {
       doDemo();
     } else if (input.equals("2")) {
+      var vsAi = new VersusAiMenu(scanner, Utils.createMatch());
+      vsAi.show();
+    } else if (input.equals("3")) {
       var mainMenu = new MainMenu(scanner);
       mainMenu.show();
     } else {
@@ -44,7 +47,8 @@ public class AiDemoMenu implements Menu {
   private void print() {
     System.out.println("\n~ Choose an option: ~");
     System.out.println("1.) Demo.");
-    System.out.println("2.) Back.");
+    System.out.println("2.) Play versus AI");
+    System.out.println("3.) Back.");
   }
 
   private void doDemo() {
@@ -75,7 +79,8 @@ public class AiDemoMenu implements Menu {
       currentTurn++;
     }
 
-    System.out.println("\n\n== Winner: " + currentMatchState.getMatchStatus().getVictor().toString() + "!");
+    System.out.println(
+        "\n\n== Winner: " + currentMatchState.getMatchStatus().getVictor().toString() + "!");
 
     show();
   }
