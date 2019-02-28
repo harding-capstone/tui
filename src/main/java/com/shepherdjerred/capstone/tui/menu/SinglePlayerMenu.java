@@ -1,8 +1,13 @@
 package com.shepherdjerred.capstone.tui.menu;
 
 import com.shepherdjerred.capstone.tui.io.Utils;
+import java.util.Scanner;
+import lombok.AllArgsConstructor;
 
+@AllArgsConstructor
 public class SinglePlayerMenu implements Menu {
+
+  private final Scanner scanner;
 
   @Override
   public void show() {
@@ -17,30 +22,28 @@ public class SinglePlayerMenu implements Menu {
     if (value != 0) {
       switch (value) {
         case 1:
-          var gameMenu = new GameMenu();
-          gameMenu.show();
+          var twoPlayer = new GameMenu(scanner, Utils.createMatch());
+          twoPlayer.show();
           break;
 
         case 2:
-          break;
-
-        case 3:
+          var mainMenu = new MainMenu(scanner);
+          mainMenu.show();
           break;
 
         default:
           System.out.println("Please enter the number of a valid option.\n");
-          // TODO: Display menu again...
+          show();
       }
     } else {
       System.out.println("Please enter a number.\n");
-      // TODO: Display menu again...
+      show();
     }
   }
 
   private void print() {
     System.out.println("\n~ Choose an option: ~");
     System.out.println("1.) Two-Player match.");
-    System.out.println("2.) Four-Player match.");
-    System.out.println("3.) Back.");
+    System.out.println("2.) Back.");
   }
 }

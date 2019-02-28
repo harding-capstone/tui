@@ -3,15 +3,6 @@ package com.shepherdjerred.capstone.tui.menu;
 import com.shepherdjerred.capstone.ai.ab.AlphaBetaQuoridorAi;
 import com.shepherdjerred.capstone.ai.ab.evaluator.DefaultMatchEvaluator;
 import com.shepherdjerred.capstone.ai.ab.evaluator.RandomMatchEvaluator;
-import com.shepherdjerred.capstone.logic.board.Board;
-import com.shepherdjerred.capstone.logic.board.BoardPieces;
-import com.shepherdjerred.capstone.logic.board.BoardPiecesInitializer;
-import com.shepherdjerred.capstone.logic.board.BoardSettings;
-import com.shepherdjerred.capstone.logic.board.layout.BoardCellsInitializer;
-import com.shepherdjerred.capstone.logic.board.layout.BoardLayout;
-import com.shepherdjerred.capstone.logic.match.Match;
-import com.shepherdjerred.capstone.logic.match.MatchSettings;
-import com.shepherdjerred.capstone.logic.match.MatchSettings.PlayerCount;
 import com.shepherdjerred.capstone.logic.match.MatchStatus.Status;
 import com.shepherdjerred.capstone.logic.player.PlayerId;
 import com.shepherdjerred.capstone.logic.turn.Turn;
@@ -19,8 +10,16 @@ import com.shepherdjerred.capstone.logic.turn.enactor.MatchTurnEnactor;
 import com.shepherdjerred.capstone.logic.turn.enactor.TurnEnactorFactory;
 import com.shepherdjerred.capstone.logic.turn.validator.TurnValidator;
 import com.shepherdjerred.capstone.logic.util.MatchFormatter;
+import com.shepherdjerred.capstone.tui.io.Utils;
+import java.util.Scanner;
+import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
+@AllArgsConstructor
 public class AiDemoMenu implements Menu {
+
+  private final Scanner scanner;
 
   @Override
   public void show() {
@@ -29,34 +28,30 @@ public class AiDemoMenu implements Menu {
   }
 
   private void handleInput() {
+    var input = scanner.next();
 
+    if (input.equals("1")) {
+      doDemo();
+    } else if (input.equals("2")) {
+      var mainMenu = new MainMenu(scanner);
+      mainMenu.show();
+    } else {
+      System.out.println("Invalid input; try again");
+      show();
+    }
   }
 
   private void print() {
-
-  }
-
-  private Match createMatch() {
-    var boardSettings = new BoardSettings(9, PlayerCount.TWO);
-    var matchSettings = new MatchSettings(10, PlayerId.ONE, boardSettings);
-
-    var boardCellsInitializer = new BoardCellsInitializer();
-    var boardLayout = BoardLayout.fromBoardSettings(boardCellsInitializer, boardSettings);
-
-    var pieceBoardLocationsInitializer = new BoardPiecesInitializer();
-    var pieceBoardLocations = BoardPieces.initializePieceLocations(boardSettings,
-        pieceBoardLocationsInitializer);
-
-    var board = Board.createBoard(boardLayout, pieceBoardLocations);
-    var initialMatchState = Match.startNewMatch(matchSettings, board);
-    return initialMatchState;
+    System.out.println("\n~ Choose an option: ~");
+    System.out.println("1.) Demo.");
+    System.out.println("2.) Back.");
   }
 
   private void doDemo() {
-    var initialMatchState = createMatch();
+    var initialMatchState = Utils.createMatch();
     var enactor = new MatchTurnEnactor(new TurnEnactorFactory(), new TurnValidator());
-    var alphaBetaAi = new AlphaBetaQuoridorAi(new DefaultMatchEvaluator(), 5);
-    var randomAi = new AlphaBetaQuoridorAi(new RandomMatchEvaluator(), 5);
+    var alphaBetaAi = new AlphaBetaQuoridorAi(new DefaultMatchEvaluator(), 2);
+    var randomAi = new AlphaBetaQuoridorAi(new RandomMatchEvaluator(), 2);
     var currentMatchState = initialMatchState;
 
     var matchFormatter = new MatchFormatter();
@@ -74,9 +69,13 @@ public class AiDemoMenu implements Menu {
       currentMatchState = currentMatchState.doTurn(aiTurn, enactor);
       System.out.println("Match after turn " + currentTurn);
       System.out.println(matchFormatter.matchToString(currentMatchState));
+      System.out.println("\n\n");
+      log.trace(matchFormatter.matchToString(currentMatchState));
 
       currentTurn++;
     }
+
+    System.out.println("\n\n== Winner: " + currentMatchState.getMatchStatus().getVictor().toString() + "!");
 
     show();
   }

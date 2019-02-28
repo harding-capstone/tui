@@ -1,7 +1,9 @@
 module com.shepherdjerred.capstone.tui {
   requires static lombok;
   requires com.shepherdjerred.capstone.logic;
-  requires com.shepherdjererd.capstone.ai;
-  requires com.shepherdjererd.capstone.storage;
+  requires com.shepherdjerred.capstone.ai;
+  requires com.shepherdjerred.capstone.storage;
   requires com.shepherdjerred.capstone.server;
+  requires com.shepherdjerred.capstone.common;
+  requires org.apache.logging.log4j;
 }

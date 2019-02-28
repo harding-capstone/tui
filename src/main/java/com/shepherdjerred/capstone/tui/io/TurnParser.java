@@ -51,7 +51,7 @@ public class TurnParser {
           x = 16;
           break;
         default:
-          System.out.println(x);
+          throw new IllegalArgumentException(move);
       }
 
       // Debug:
@@ -89,11 +89,11 @@ public class TurnParser {
           y = 16;
           break;
         default:
-          System.out.println(y);
+          throw new IllegalArgumentException(move);
       }
 
       // Debug:
-      System.out.println(y);
+//      System.out.println(y);
 
       // WALL:
       // If the length of string is 3, examine if horizontal or vertical wall
@@ -101,12 +101,12 @@ public class TurnParser {
 
       if (move.length() == 3) {
         if (move.endsWith("h")) {
-          System.out.println("Horizontal wall!");
+//          System.out.println("Horizontal wall!");
           Coordinate coordinate1 = new Coordinate(x, y + 1);
           Coordinate coordinate2 = new Coordinate(x + 2, y + 1);
           turn = new PlaceWallTurn(PlayerId.NULL, coordinate1, coordinate2);
         } else {
-          System.out.println("Vertical wall!");
+//          System.out.println("Vertical wall!");
           Coordinate coordinate1 = new Coordinate(x + 1, y);
           Coordinate coordinate2 = new Coordinate(x + 1, y + 2);
           turn = new PlaceWallTurn(PlayerId.NULL, coordinate1, coordinate2);
@@ -115,7 +115,7 @@ public class TurnParser {
         turn = new MovePawnTurn(PlayerId.NULL, null, null, new Coordinate(x, y));
       }
     } else {
-      // TODO: Invalid move...
+      throw new IllegalArgumentException(move);
     }
 
     return turn;
