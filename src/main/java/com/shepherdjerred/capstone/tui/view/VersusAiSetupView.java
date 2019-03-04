@@ -59,11 +59,11 @@ public class VersusAiSetupView implements View {
       MatchSettings matchSettings = new MatchSettings(10, startingPlayer, PlayerCount.TWO);
 
       EvaluatorWeights evaluatorWeights = new EvaluatorWeights(
-          0,
-          6,
-          6,
-          9,
-          1
+          9612.407041694314,
+          -7288.691596308785,
+          9786.056427421212,
+          2396.69915479313,
+          476.91303038346996
       );
 
       MatchEvaluator matchEvaluator = new WeightedMatchEvaluator(evaluatorWeights);
@@ -73,7 +73,7 @@ public class VersusAiSetupView implements View {
       pruningRules.add(new DeepWallPruningRule(5));
       pruningRules.add(new PieceDistancePruningRule(3));
 
-      QuoridorAi quoridorAi = new PruningAlphaBetaQuoridorAi(matchEvaluator, 2, pruningRules);
+      QuoridorAi quoridorAi = new PruningAlphaBetaQuoridorAi(matchEvaluator, 3, pruningRules);
 
       return Optional.of(new PlayerVersusAiView(scanner,
           boardSettings,
