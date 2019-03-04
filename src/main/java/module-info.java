@@ -6,5 +6,6 @@ open module com.shepherdjerred.capstone.tui {
   requires com.shepherdjerred.capstone.server;
   requires com.shepherdjerred.capstone.common;
   requires org.apache.logging.log4j;
+  requires io.jenetics.base;
   exports com.shepherdjerred.capstone.tui;
 }

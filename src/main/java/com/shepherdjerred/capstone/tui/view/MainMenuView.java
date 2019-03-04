@@ -17,6 +17,7 @@ public class MainMenuView implements View {
     while (shouldContinue) {
       System.out.println("Main Menu");
       System.out.println("1. Play vs AI");
+      System.out.println("2. Run Genetic AI");
       System.out.println("2. Exit");
 
       var in = scanner.next();
@@ -26,6 +27,8 @@ public class MainMenuView implements View {
         if (intValue == 1) {
           return Optional.of(new VersusAiSetupView(scanner));
         } else if (intValue == 2) {
+          return Optional.of(new GeneticAiView(scanner));
+        } else if (intValue == 3) {
           shouldContinue = false;
         } else {
           System.out.println("Invalid input. Try again.");
