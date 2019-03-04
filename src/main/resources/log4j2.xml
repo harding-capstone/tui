@@ -12,5 +12,9 @@
       <AppenderRef ref="FILE"/>
       <AppenderRef ref="STDOUT" level="INFO"/>
     </Root>
+    <Logger name="com.github.bentorfs.ai" level="INFO" additivity="false">
+      <AppenderRef ref="FILE"/>
+      <AppenderRef ref="STDOUT" level="INFO"/>
+    </Logger>
   </Loggers>
 </Configuration>

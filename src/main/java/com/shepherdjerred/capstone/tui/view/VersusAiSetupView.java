@@ -69,9 +69,9 @@ public class VersusAiSetupView implements View {
       MatchEvaluator matchEvaluator = new WeightedMatchEvaluator(evaluatorWeights);
 
       Set<PruningRule> pruningRules = new HashSet<>();
-      pruningRules.add(new RandomDiscardPruningRule(90));
+      pruningRules.add(new RandomDiscardPruningRule(20));
       pruningRules.add(new DeepWallPruningRule(5));
-      pruningRules.add(new PieceDistancePruningRule(2));
+      pruningRules.add(new PieceDistancePruningRule(3));
 
       QuoridorAi quoridorAi = new PruningAlphaBetaQuoridorAi(matchEvaluator, 2, pruningRules);
 

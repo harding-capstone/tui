@@ -53,7 +53,11 @@ public class PlayerVersusAiView implements View {
         var input = scanner.next();
 
         if (input.equals("UNDO")) {
-          match = match.getMatchHistory().pop();
+          if (match.getMatchHistory().isEmpty()) {
+            System.out.println("No history to undo");
+            continue;
+          }
+          match = match.getMatchHistory().pop().getMatchHistory().pop();
           continue;
         } else if (input.equals("EXIT")) {
           return Optional.of(new MainMenuView(scanner));
