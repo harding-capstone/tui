@@ -73,7 +73,7 @@ public class VersusAiSetupView implements View {
       pruningRules.add(new DeepWallPruningRule(5));
       pruningRules.add(new PieceDistancePruningRule(3));
 
-      QuoridorAi quoridorAi = new PruningAlphaBetaQuoridorAi(matchEvaluator, 3, pruningRules);
+      QuoridorAi quoridorAi = new PruningAlphaBetaQuoridorAi(matchEvaluator, 2, pruningRules);
 
       return Optional.of(new PlayerVersusAiView(scanner,
           boardSettings,

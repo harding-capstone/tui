@@ -10,7 +10,9 @@ import io.jenetics.engine.EvolutionStatistics;
 import java.util.Optional;
 import java.util.Scanner;
 import lombok.AllArgsConstructor;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 @AllArgsConstructor
 public class GeneticAiView implements View {
 
@@ -18,24 +20,33 @@ public class GeneticAiView implements View {
 
   @Override
   public Optional<View> display() {
-    var weights = new WeightsProblem();
+    var problem = new WeightsProblem();
 
     final Engine<DoubleGene, Integer> engine = Engine
-        .builder(weights.fitness(), weights.codec())
+        .builder(problem)
         .build();
 
-    final EvolutionStatistics<Integer, ?>
-        statistics = EvolutionStatistics.ofNumber();
+    final EvolutionStatistics<Integer, ?> statistics = EvolutionStatistics.ofNumber();
 
     final Genotype<DoubleGene> gt = engine.stream()
         .limit(100)
         .peek(statistics)
-        .peek(r -> System.out.println(statistics))
+        .peek(result -> {
+          var weights = problem.codec()
+              .decoder()
+              .apply(result.getBestPhenotype().getGenotype());
+          log.info(weights);
+        })
+        .peek(r -> {
+          log.info(statistics);
+          System.out.println(statistics);
+        })
         .collect(EvolutionResult.toBestGenotype());
 
-    final EvaluatorWeights param = weights.decode(gt);
+    final EvaluatorWeights param = problem.decode(gt);
     System.out.println(String.format("Result: \t%s", param));
+    log.info("== Result ==\n" + param);
 
-    return Optional.empty();
+    return Optional.of(new MainMenuView(scanner));
   }
 }
