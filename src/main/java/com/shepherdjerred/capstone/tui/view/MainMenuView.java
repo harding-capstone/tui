@@ -18,7 +18,7 @@ public class MainMenuView implements View {
       System.out.println("Main Menu");
       System.out.println("1. Play vs AI");
       System.out.println("2. Run Genetic AI");
-      System.out.println("2. Exit");
+      System.out.println("3. Exit");
 
       var in = scanner.next();
       try {

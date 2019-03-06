@@ -3,15 +3,16 @@ package com.shepherdjerred.capstone.tui.view;
 import com.shepherdjerred.capstone.ai.QuoridorAi;
 import com.shepherdjerred.capstone.logic.board.BoardSettings;
 import com.shepherdjerred.capstone.logic.match.Match;
+import com.shepherdjerred.capstone.logic.match.MatchFormatter;
 import com.shepherdjerred.capstone.logic.match.MatchSettings;
 import com.shepherdjerred.capstone.logic.match.MatchStatus.Status;
-import com.shepherdjerred.capstone.logic.player.PlayerId;
+import com.shepherdjerred.capstone.logic.player.QuoridorPlayer;
 import com.shepherdjerred.capstone.logic.turn.MovePawnTurn;
 import com.shepherdjerred.capstone.logic.turn.NormalMovePawnTurn;
 import com.shepherdjerred.capstone.logic.turn.PlaceWallTurn;
 import com.shepherdjerred.capstone.logic.turn.Turn;
-import com.shepherdjerred.capstone.logic.util.MatchFormatter;
-import com.shepherdjerred.capstone.logic.util.NotationFormatter;
+import com.shepherdjerred.capstone.logic.turn.notation.NotationToTurnConverter;
+import com.shepherdjerred.capstone.logic.turn.notation.TurnToNotationConverter;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class PlayerVersusAiView implements View {
   private final BoardSettings boardSettings;
   private final MatchSettings matchSettings;
   private final QuoridorAi quoridorAi;
-  private final PlayerId aiPlayer;
+  private final QuoridorPlayer aiPlayer;
 
   @Override
   public Optional<View> display() {
@@ -36,6 +37,7 @@ public class PlayerVersusAiView implements View {
     var shouldContinue = true;
 
     while (shouldContinue) {
+      System.out.println(formatter.matchToString(match));
       var activePlayer = match.getActivePlayerId();
       if (activePlayer == aiPlayer) {
         System.out.println("Starting AI");
@@ -45,8 +47,9 @@ public class PlayerVersusAiView implements View {
         var elapsed = Duration.between(startTime, endTime);
         match = match.doTurn(turn);
 
+        var converter = new TurnToNotationConverter();
         System.out.println("Time taken: " + elapsed.toMillis() / 1000 + "s");
-        System.out.println("AI turn: " + NotationFormatter.turnToString(turn));
+        System.out.println("AI turn: " + converter.convert(turn));
       } else {
         System.out.println("Available commands: UNDO, EXIT");
         System.out.println("Enter a turn in Quoridor notation (i.e. a1 or a1v) or a command");
@@ -57,7 +60,7 @@ public class PlayerVersusAiView implements View {
             System.out.println("No history to undo");
             continue;
           }
-          match = match.getMatchHistory().pop().getMatchHistory().pop();
+          match = match.getMatchHistory().pop().getMatch().getMatchHistory().pop().getMatch();
           continue;
         } else if (input.equals("EXIT")) {
           return Optional.of(new MainMenuView(scanner));
@@ -66,7 +69,8 @@ public class PlayerVersusAiView implements View {
         Turn turn = null;
 
         try {
-          turn = NotationFormatter.stringToTurn(input);
+          var converter = new NotationToTurnConverter();
+          turn = converter.convert(input);
         } catch (Exception e) {
           log.error("Error converting notation string to turn", e);
         }
@@ -90,8 +94,6 @@ public class PlayerVersusAiView implements View {
       if (match.getMatchStatus().getStatus() == Status.VICTORY) {
         shouldContinue = false;
       }
-
-      System.out.println(formatter.matchToString(match));
     }
 
     System.out.println("WINNER: " + match.getMatchStatus().getVictor());

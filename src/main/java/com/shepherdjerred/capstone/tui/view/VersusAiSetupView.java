@@ -2,17 +2,17 @@ package com.shepherdjerred.capstone.tui.view;
 
 import com.shepherdjerred.capstone.ai.QuoridorAi;
 import com.shepherdjerred.capstone.ai.alphabeta.pruning.PruningAlphaBetaQuoridorAi;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.DeepWallPruningRule;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.PieceDistancePruningRule;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.PruningRule;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.RandomDiscardPruningRule;
+import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.DeepWallNodePruningRule;
+import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.NodePruningRule;
+import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.PieceDistanceNodePruningRule;
+import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.RandomDiscardNodePruningRule;
 import com.shepherdjerred.capstone.ai.evaluator.EvaluatorWeights;
 import com.shepherdjerred.capstone.ai.evaluator.MatchEvaluator;
 import com.shepherdjerred.capstone.ai.evaluator.WeightedMatchEvaluator;
 import com.shepherdjerred.capstone.logic.board.BoardSettings;
 import com.shepherdjerred.capstone.logic.match.MatchSettings;
 import com.shepherdjerred.capstone.logic.player.PlayerCount;
-import com.shepherdjerred.capstone.logic.player.PlayerId;
+import com.shepherdjerred.capstone.logic.player.QuoridorPlayer;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Scanner;
@@ -30,15 +30,15 @@ public class VersusAiSetupView implements View {
   public Optional<View> display() {
     boolean shouldContinue = true;
     while (shouldContinue) {
-      PlayerId startingPlayer;
-      PlayerId aiPlayer;
+      QuoridorPlayer startingPlayer;
+      QuoridorPlayer aiPlayer;
 
       System.out.println("Starting player");
       var input = scanner.next();
 
       try {
         var startingPlayerInt = Integer.parseInt(input);
-        startingPlayer = PlayerId.fromInt(startingPlayerInt);
+        startingPlayer = QuoridorPlayer.fromInt(startingPlayerInt);
       } catch (Exception e) {
         log.error("Error parsing starting player", e);
         continue;
@@ -49,7 +49,7 @@ public class VersusAiSetupView implements View {
 
       try {
         var aiPlayerInt = Integer.parseInt(input);
-        aiPlayer = PlayerId.fromInt(aiPlayerInt);
+        aiPlayer = QuoridorPlayer.fromInt(aiPlayerInt);
       } catch (Exception e) {
         log.error("Error parsing ai player", e);
         continue;
@@ -59,21 +59,21 @@ public class VersusAiSetupView implements View {
       MatchSettings matchSettings = new MatchSettings(10, startingPlayer, PlayerCount.TWO);
 
       EvaluatorWeights evaluatorWeights = new EvaluatorWeights(
-          9612.407041694314,
-          -7288.691596308785,
-          9786.056427421212,
-          2396.69915479313,
-          476.91303038346996
+          2293.7109999771455,
+          398.7527547140071,
+          4762.159725078656,
+          9407.150981288025,
+          -6985.356279833557
       );
 
       MatchEvaluator matchEvaluator = new WeightedMatchEvaluator(evaluatorWeights);
 
-      Set<PruningRule> pruningRules = new HashSet<>();
-      pruningRules.add(new RandomDiscardPruningRule(20));
-      pruningRules.add(new DeepWallPruningRule(5));
-      pruningRules.add(new PieceDistancePruningRule(3));
+      Set<NodePruningRule> pruningRules = new HashSet<>();
+      pruningRules.add(new RandomDiscardNodePruningRule(50));
+      pruningRules.add(new DeepWallNodePruningRule(2));
+      pruningRules.add(new PieceDistanceNodePruningRule(3));
 
-      QuoridorAi quoridorAi = new PruningAlphaBetaQuoridorAi(matchEvaluator, 2, pruningRules);
+      QuoridorAi quoridorAi = new PruningAlphaBetaQuoridorAi(matchEvaluator, 4, pruningRules);
 
       return Optional.of(new PlayerVersusAiView(scanner,
           boardSettings,
