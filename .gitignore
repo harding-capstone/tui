@@ -190,4 +190,4 @@ $RECYCLE.BIN/
 
 *.iml
 .idea
-/
+logs/
