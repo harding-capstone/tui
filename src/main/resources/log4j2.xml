@@ -1,15 +1,23 @@
-<Configuration status="info">
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" name="tui">
   <Appenders>
-    <File name="FILE" fileName="tui.log">
-      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
-    </File>
+    <RollingFile name="File" fileName="logs/tui.log" filePattern="logs/$${date:yyyy-M}/app-%d{MM-dd-yyyy}-%i.log.gz">
+      <PatternLayout>
+        <Pattern>%d{HH:mm:ss,SSS} %p %c{1.} [%t] %m%n</Pattern>
+      </PatternLayout>
+      <DefaultRolloverStrategy max="10"/>
+      <Policies>
+        <OnStartupTriggeringPolicy/>
+        <SizeBasedTriggeringPolicy size="100 MB" />
+      </Policies>
+    </RollingFile>
   </Appenders>
   <Loggers>
     <Root level="trace">
-      <AppenderRef ref="FILE"/>
+      <AppenderRef ref="File"/>
     </Root>
     <Logger name="com.github.bentorfs.ai" level="INFO" additivity="false">
-      <AppenderRef ref="FILE"/>
+      <AppenderRef ref="File"/>
     </Logger>
   </Loggers>
 </Configuration>

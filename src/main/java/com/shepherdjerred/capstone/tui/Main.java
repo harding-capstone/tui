@@ -1,25 +1,33 @@
 package com.shepherdjerred.capstone.tui;
 
-import com.shepherdjerred.capstone.tui.view.MainMenuView;
-import com.shepherdjerred.capstone.tui.view.View;
-import java.util.Scanner;
+import com.googlecode.lanterna.gui2.MultiWindowTextGUI;
+import com.googlecode.lanterna.gui2.WindowBasedTextGUI;
+import com.googlecode.lanterna.screen.Screen;
+import com.googlecode.lanterna.screen.TerminalScreen;
+import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
+import com.googlecode.lanterna.terminal.Terminal;
+import com.shepherdjerred.capstone.tui.windows.MainWindow;
+import java.io.IOException;
+import lombok.extern.log4j.Log4j2;
 
+@Log4j2
 public class Main {
 
-  public static void main(String[] args) throws InterruptedException {
-    View view = new MainMenuView(new Scanner(System.in));
-    boolean shouldContinue = true;
+  public static void main(String[] args) throws IOException {
+    try {
+      Terminal term = new DefaultTerminalFactory().createTerminal();
+      Screen screen = new TerminalScreen(term);
 
-    while (shouldContinue) {
-      var newView = view.display();
-      if (newView.isPresent()) {
-        view = newView.get();
-      } else {
-        shouldContinue = false;
-      }
+      WindowBasedTextGUI gui = new MultiWindowTextGUI(screen);
+      screen.startScreen();
+
+      var mainWindow = new MainWindow();
+      gui.addWindowAndWait(mainWindow);
+
+      screen.stopScreen();
+    } catch (Exception e) {
+      log.error("Error", e);
+      throw e;
     }
-
-    Thread.sleep(500);
-    System.out.println("Exiting...");
   }
 }

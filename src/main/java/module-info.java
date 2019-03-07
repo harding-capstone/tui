@@ -1,5 +1,6 @@
-open module com.shepherdjerred.capstone.tui {
+module com.shepherdjerred.capstone.tui {
   requires static lombok;
+
   requires com.shepherdjerred.capstone.logic;
   requires com.shepherdjerred.capstone.ai;
   requires com.shepherdjerred.capstone.storage;
@@ -7,5 +8,7 @@ open module com.shepherdjerred.capstone.tui {
   requires com.shepherdjerred.capstone.common;
   requires org.apache.logging.log4j;
   requires io.jenetics.base;
+  requires lanterna;
+
   exports com.shepherdjerred.capstone.tui;
 }
