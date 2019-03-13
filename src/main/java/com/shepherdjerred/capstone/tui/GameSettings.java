@@ -11,6 +11,7 @@ import lombok.Getter;
 @Getter
 @AllArgsConstructor
 public class GameSettings {
+
   private final MatchSettings matchSettings;
   private final BoardSettings boardSettings;
   private final Map<QuoridorPlayer, QuoridorAi> aiPlayers;

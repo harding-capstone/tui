@@ -1,13 +1,17 @@
 package com.shepherdjerred.capstone.tui.windows;
 
 import com.googlecode.lanterna.gui2.BasicWindow;
+import com.googlecode.lanterna.gui2.Button;
 import com.googlecode.lanterna.gui2.Direction;
 import com.googlecode.lanterna.gui2.Label;
 import com.googlecode.lanterna.gui2.LinearLayout;
 import com.googlecode.lanterna.gui2.Panel;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
+import com.googlecode.lanterna.gui2.dialogs.MessageDialogButton;
 import com.googlecode.lanterna.gui2.dialogs.TextInputDialog;
 import com.shepherdjerred.capstone.logic.board.BoardFormatter;
 import com.shepherdjerred.capstone.logic.match.Match;
+import com.shepherdjerred.capstone.logic.match.MatchStatus.Status;
 import com.shepherdjerred.capstone.logic.turn.MovePawnTurn;
 import com.shepherdjerred.capstone.logic.turn.NormalMovePawnTurn;
 import com.shepherdjerred.capstone.logic.turn.PlaceWallTurn;
@@ -31,16 +35,16 @@ public class MatchWindow extends BasicWindow {
 
   public MatchWindow(GameSettings gameSettings) {
     super("Match");
-
-    if (getTextGUI() == null) {
-      log.error("GUI IS NULL");
-    }
-
     this.gameSettings = gameSettings;
-    match = createMatch();
 
-    var panel = new Panel();
-    panel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+    var layout = new LinearLayout(Direction.HORIZONTAL);
+    var panel = new Panel(layout);
+    init(panel);
+    super.setComponent(panel);
+  }
+
+  private void init(Panel panel) {
+    match = createMatch();
 
     var detailsPanel = new Panel();
     detailsPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
@@ -58,15 +62,8 @@ public class MatchWindow extends BasicWindow {
     boardLabel = new Label("");
     panel.addComponent(boardLabel);
 
-    setComponent(panel);
-
-
-
-    try {
-      run();
-    } catch (InterruptedException e) {
-      e.printStackTrace();
-    }
+    var startButton = new Button("Start Game", this::run);
+    panel.addComponent(startButton);
   }
 
   private Match createMatch() {
@@ -87,68 +84,65 @@ public class MatchWindow extends BasicWindow {
     }
   }
 
-  private void run() throws InterruptedException {
-    var aiMap = gameSettings.getAiPlayers();
-
-//    final long secondsPerFrame = 1000 / 30;
-//    while (match.getMatchStatus().getStatus() == Status.IN_PROGRESS) {
-//      var time = System.currentTimeMillis();
-//
+  private void updateInterface() {
     updateMatchLabel();
     updateActivePlayerLabel();
-    if (aiMap.containsKey(match.getActivePlayerId())) {
-      handleAiTurn();
-    } else {
-      handlePlayerTurn();
-    }
-//
-//      Thread.sleep((time + secondsPerFrame) - System.currentTimeMillis());
-//    }
-
-//    new MessageDialogBuilder()
-//        .setTitle("Game Over")
-//        .setText(match.getMatchStatus().getVictor() + " won!")
-//        .addButton(MessageDialogButton.Close)
-//        .build()
-//        .showDialog(getTextGUI());
-//
-//    close();
   }
 
-  private void handleAiTurn() {
+  public void run() {
+    var aiMap = gameSettings.getAiPlayers();
+
+    updateInterface();
+
+    while (match.getMatchStatus().getStatus() == Status.IN_PROGRESS) {
+
+      Turn turn;
+      if (aiMap.containsKey(match.getActivePlayerId())) {
+        var start = Instant.now();
+        turn = getAiTurn();
+        var end = Instant.now();
+        var dur = Duration.between(start, end);
+        aiTimeTakenLabel.setText("AI Time: " + dur.toMillis() / 1000 + "s");
+        var converter = new TurnToNotationConverter();
+        aiMoveLabel.setText("AI Move: " + converter.convert(turn));
+      } else {
+        var player = match.getActivePlayerId();
+        var converter = new NotationToTurnConverter();
+
+        do {
+          var turnString = TextInputDialog.showDialog(getTextGUI(),
+              "Enter move for player " + player.toInt(),
+              "Your turn should be in Quoridor notation",
+              "");
+          turn = converter.convert(turnString);
+        } while (turn == null);
+
+        if (turn instanceof MovePawnTurn) {
+          turn = new NormalMovePawnTurn(player, null, ((MovePawnTurn) turn).getDestination());
+        } else if (turn instanceof PlaceWallTurn) {
+          turn = new PlaceWallTurn(player, ((PlaceWallTurn) turn).getLocation());
+        }
+      }
+      match = match.doTurnUnchecked(turn);
+      updateInterface();
+    }
+
+    new MessageDialogBuilder()
+        .setTitle("Game Over")
+        .setText(match.getMatchStatus().getVictor() + " won!")
+        .addButton(MessageDialogButton.Close)
+        .build()
+        .showDialog(getTextGUI());
+
+    close();
+  }
+
+  private Turn getAiTurn() {
     var player = match.getActivePlayerId();
     var ai = gameSettings.getAiPlayers().get(player);
     if (ai == null) {
       log.error("No AI");
     }
-    var start = Instant.now();
-    var turn = ai.calculateBestTurn(match);
-    var end = Instant.now();
-    match = match.doTurnUnchecked(turn);
-    var dur = Duration.between(start, end);
-    aiTimeTakenLabel.setText("AI Time: " + dur.toMillis() / 1000 + "s");
-    var converter = new TurnToNotationConverter();
-    aiMoveLabel.setText("AI Move: " + converter.convert(turn));
-  }
-
-  private void handlePlayerTurn() {
-    var player = match.getActivePlayerId();
-    var converter = new NotationToTurnConverter();
-    Turn turn;
-
-
-
-    do {
-      var turnString = TextInputDialog.showDialog(getTextGUI(), "Enter Move", "", "");
-      turn = converter.convert(turnString);
-    } while (turn == null);
-
-    if (turn instanceof MovePawnTurn) {
-      turn = new NormalMovePawnTurn(player, null, ((MovePawnTurn) turn).getDestination());
-    } else if (turn instanceof PlaceWallTurn) {
-      turn = new PlaceWallTurn(player, ((PlaceWallTurn) turn).getLocation());
-    }
-
-    match = match.doTurnUnchecked(turn);
+    return ai.calculateBestTurn(match);
   }
 }

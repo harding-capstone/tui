@@ -11,18 +11,11 @@ import com.googlecode.lanterna.gui2.TextBox;
 import com.googlecode.lanterna.gui2.dialogs.ActionListDialogBuilder;
 import com.googlecode.lanterna.gui2.dialogs.MessageDialogBuilder;
 import com.shepherdjerred.capstone.ai.QuoridorAi;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.PruningAlphaBetaQuoridorAi;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.DeepWallNodePruningRule;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.NodePruningRule;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.PieceDistanceNodePruningRule;
-import com.shepherdjerred.capstone.ai.alphabeta.pruning.rules.RandomDiscardNodePruningRule;
-import com.shepherdjerred.capstone.ai.evaluator.EvaluatorWeights;
-import com.shepherdjerred.capstone.ai.evaluator.MatchEvaluator;
-import com.shepherdjerred.capstone.ai.evaluator.WeightedMatchEvaluator;
 import com.shepherdjerred.capstone.logic.board.BoardSettings;
 import com.shepherdjerred.capstone.logic.match.MatchSettings;
 import com.shepherdjerred.capstone.logic.player.PlayerCount;
 import com.shepherdjerred.capstone.logic.player.QuoridorPlayer;
+import com.shepherdjerred.capstone.tui.AiProvider;
 import com.shepherdjerred.capstone.tui.AiSettings;
 import com.shepherdjerred.capstone.tui.GameSettings;
 import java.util.HashMap;
@@ -33,25 +26,47 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-public class NewMatchWindow extends BasicWindow {
+public class GameSettingsWindow extends BasicWindow {
 
-  private int wallsPerPlayer = 10;
   private QuoridorPlayer startingPlayer = QuoridorPlayer.ONE;
   private PlayerCount playerCount = PlayerCount.TWO;
-  private int boardSize = 9;
   private Set<QuoridorPlayer> aiPlayers = new HashSet<>();
+  private TextBox wallsPerPlayerTextBox;
+  private TextBox boardSizeTextBox;
 
-  public NewMatchWindow() {
-    super("New Match");
+  public GameSettingsWindow() {
+    super.setTitle("New Match");
+    var panel = createPanel();
+    super.setComponent(panel);
+  }
 
-    var panel = new Panel();
-    panel.setLayoutManager(new GridLayout(2));
+  private Panel createPanel() {
+    var layout = new GridLayout(2);
+    layout.setHorizontalSpacing(5);
+    layout.setVerticalSpacing(1);
+    var panel = new Panel(layout);
+    initializePanelComponents(panel);
+    return panel;
+  }
 
+  private void initializePanelComponents(Panel panel) {
+    createWallsPerPlayerField(panel);
+    createStartingPlayerField(panel);
+    createPlayerCountField(panel);
+    createBoardSizeField(panel);
+    createAiPlayersField(panel);
+    createBackButton(panel);
+    createStartButton(panel);
+  }
+
+  private void createWallsPerPlayerField(Panel panel) {
     var wallsPerPlayerLabel = new Label("Walls Per Player");
-    var wallsPerPlayerTextBox = new TextBox().setText("10").setValidationPattern(getIntPattern());
+    wallsPerPlayerTextBox = new TextBox().setText("10").setValidationPattern(getIntPattern());
     panel.addComponent(wallsPerPlayerLabel);
     panel.addComponent(wallsPerPlayerTextBox);
+  }
 
+  private void createStartingPlayerField(Panel panel) {
     var startingPlayerLabel = new Label("Starting Player");
     var startingPlayerComboBox = new ComboBox<QuoridorPlayer>()
         .addItem(QuoridorPlayer.ONE)
@@ -63,7 +78,9 @@ public class NewMatchWindow extends BasicWindow {
     startingPlayerComboBox.setSelectedIndex(0);
     panel.addComponent(startingPlayerLabel);
     panel.addComponent(startingPlayerComboBox);
+  }
 
+  private void createPlayerCountField(Panel panel) {
     var playerCountLabel = new Label("Player Count");
     var playerCountComboBox = new ComboBox<PlayerCount>();
     playerCountComboBox.addItem(PlayerCount.TWO);
@@ -80,12 +97,16 @@ public class NewMatchWindow extends BasicWindow {
     playerCountComboBox.setSelectedIndex(0);
     panel.addComponent(playerCountLabel);
     panel.addComponent(playerCountComboBox);
+  }
 
+  private void createBoardSizeField(Panel panel) {
     var boardSizeLabel = new Label("Board Size");
-    var boardSizeTextBox = new TextBox("9").setValidationPattern(getOddIntPattern());
+    boardSizeTextBox = new TextBox("9").setValidationPattern(getOddIntPattern());
     panel.addComponent(boardSizeLabel);
     panel.addComponent(boardSizeTextBox);
+  }
 
+  private void createAiPlayersField(Panel panel) {
     var aiPlayersLabel = new Label("AI Players");
     var aiPlayersCheckBoxes = new CheckBoxList<QuoridorPlayer>();
     aiPlayersCheckBoxes.addItem(QuoridorPlayer.ONE);
@@ -101,32 +122,49 @@ public class NewMatchWindow extends BasicWindow {
     });
     panel.addComponent(aiPlayersLabel);
     panel.addComponent(aiPlayersCheckBoxes);
+  }
 
-    panel.addComponent(new Button("Exit", this::close));
-    setComponent(panel);
+  private void createBackButton(Panel panel) {
+    panel.addComponent(new Button("Back", super::close));
+  }
 
+  private int getWallsPerPlayer() {
+    return Integer.parseInt(wallsPerPlayerTextBox.getText());
+  }
+
+  private int getBoardSize() {
+    return Integer.parseInt(boardSizeTextBox.getText());
+  }
+
+  private boolean isAnyFieldInvalid() {
+    var gui = super.getTextGUI();
+    if (startingPlayer.toInt() > playerCount.toInt()) {
+      new MessageDialogBuilder()
+          .setTitle("Error")
+          .setText("Starting player is not in this game")
+          .build()
+          .showDialog(gui);
+      return true;
+    }
+    if (aiPlayers.stream().anyMatch(player -> player.toInt() > playerCount.toInt())) {
+      new MessageDialogBuilder()
+          .setTitle("Error")
+          .setText("AI player is not in this game")
+          .build()
+          .showDialog(gui);
+      return true;
+    }
+    return false;
+  }
+
+  private void createStartButton(Panel panel) {
     var startButton = new Button("Start Match", () -> {
-      this.wallsPerPlayer = Integer.parseInt(wallsPerPlayerTextBox.getText());
-      this.boardSize = Integer.parseInt(boardSizeTextBox.getText());
-      var gui = getTextGUI();
-      if (startingPlayer.toInt() > playerCount.toInt()) {
-        new MessageDialogBuilder()
-            .setTitle("Error")
-            .setText("Starting player is not in this game")
-            .build()
-            .showDialog(gui);
-        return;
-      }
-      if (aiPlayers.stream().anyMatch(player -> player.toInt() > playerCount.toInt())) {
-        new MessageDialogBuilder()
-            .setTitle("Error")
-            .setText("AI player is not in this game")
-            .build()
-            .showDialog(gui);
+      if (isAnyFieldInvalid()) {
         return;
       }
 
-      var aiMap = getAiMap();
+      var gui = super.getTextGUI();
+      var aiMap = getPlayerToAiMap();
 
       if (aiMap.values().stream().anyMatch(Objects::isNull)) {
         new MessageDialogBuilder()
@@ -137,38 +175,23 @@ public class NewMatchWindow extends BasicWindow {
         return;
       }
 
-      var gameSettings = new GameSettings(getMatchSettings(), getBoardSettings(), aiMap);
+      var gameSettings = new GameSettings(createMatchSettings(), createBoardSettings(), aiMap);
       var window = new MatchWindow(gameSettings);
       gui.addWindowAndWait(window);
-      close();
+//      super.close();
     });
+
     panel.addComponent(startButton);
   }
 
-  private final Optional<QuoridorAi> getQuoridorAi(QuoridorPlayer quoridorPlayer) {
+  private Optional<QuoridorAi> promptForQuoridorAi(QuoridorPlayer quoridorPlayer) {
     var aiSettings = new AiSettings(null, quoridorPlayer);
 
     new ActionListDialogBuilder()
         .setTitle("AI for " + quoridorPlayer)
         .setDescription("Choose an item")
-        .addAction("Use best current AI", () -> {
-          var evaluatorWeights = new EvaluatorWeights(
-              2293.7109999771455,
-              398.7527547140071,
-              4762.159725078656,
-              9407.150981288025,
-              -6985.356279833557
-          );
-
-          MatchEvaluator matchEvaluator = new WeightedMatchEvaluator(evaluatorWeights);
-
-          Set<NodePruningRule> pruningRules = new HashSet<>();
-          pruningRules.add(new RandomDiscardNodePruningRule(50));
-          pruningRules.add(new DeepWallNodePruningRule(2));
-          pruningRules.add(new PieceDistanceNodePruningRule(3));
-
-          var quoridorAi = new PruningAlphaBetaQuoridorAi(matchEvaluator, 4, pruningRules);
-
+        .addAction("Use default AI", () -> {
+          var quoridorAi = new AiProvider().getDefaultQuoridorAi();
           aiSettings.setQuoridorAi(quoridorAi);
         })
         .build()
@@ -182,10 +205,10 @@ public class NewMatchWindow extends BasicWindow {
     }
   }
 
-  private final Map<QuoridorPlayer, QuoridorAi> getAiMap() {
+  private Map<QuoridorPlayer, QuoridorAi> getPlayerToAiMap() {
     Map<QuoridorPlayer, QuoridorAi> aiMap = new HashMap<>();
     aiPlayers.forEach(player -> {
-      var ai = getQuoridorAi(player);
+      var ai = promptForQuoridorAi(player);
       if (ai.isPresent()) {
         aiMap.put(player, ai.get());
       } else {
@@ -195,12 +218,12 @@ public class NewMatchWindow extends BasicWindow {
     return aiMap;
   }
 
-  private BoardSettings getBoardSettings() {
-    return new BoardSettings(boardSize, playerCount);
+  private BoardSettings createBoardSettings() {
+    return new BoardSettings(getBoardSize(), playerCount);
   }
 
-  private MatchSettings getMatchSettings() {
-    return new MatchSettings(wallsPerPlayer, startingPlayer, playerCount);
+  private MatchSettings createMatchSettings() {
+    return new MatchSettings(getWallsPerPlayer(), startingPlayer, playerCount);
   }
 
   private Pattern getOddIntPattern() {
