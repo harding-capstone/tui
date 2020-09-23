@@ -20,20 +20,8 @@
 
   <repositories>
     <repository>
-      <id>capstone-snapshots</id>
-      <url>http://capstone.shepherdjerred.com:8081/repository/capstone-snapshots/</url>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
-    </repository>
-    <repository>
-      <id>capstone-releases</id>
-      <url>http://capstone.shepherdjerred.com:8081/repository/capstone-releases/</url>
-      <snapshots>
-        <enabled>false</enabled>
-        <updatePolicy>always</updatePolicy>
-      </snapshots>
+      <id>harding-capstone pom</id>
+      <url>https://maven.pkg.github.com/harding-capstone/pom</url>
     </repository>
   </repositories>
 

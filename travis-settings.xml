@@ -1,18 +1,57 @@
 <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
-                      https://maven.apache.org/xsd/settings-1.0.0.xsd">
+                      http://maven.apache.org/xsd/settings-1.0.0.xsd">
   <servers>
     <server>
-      <id>capstone-snapshots</id>
-      <username>${env.SONATYPE_USERNAME}</username>
-      <password>${env.SONATYPE_PASSWORD}</password>
+      <id>harding-capstone ai</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
     </server>
     <server>
-      <id>capstone-releases</id>
-      <username>${env.SONATYPE_USERNAME}</username>
-      <password>${env.SONATYPE_PASSWORD}</password>
+      <id>harding-capstone common</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
+    </server>
+    <server>
+      <id>harding-capstone engine</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
+    </server>
+    <server>
+      <id>harding-capstone events</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
+    </server>
+    <server>
+      <id>harding-capstone logic</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
+    </server>
+    <server>
+      <id>harding-capstone network</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
+    </server>
+    <server>
+      <id>harding-capstone pom</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
+    </server>
+    <server>
+      <id>harding-capstone server</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
+    </server>
+    <server>
+      <id>harding-capstone storage</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
+    </server>
+    <server>
+      <id>harding-capstone tui</id>
+      <username>${env.GITHUB_USER}</username>
+      <password>${env.GITHUB_ACCESS_TOKEN}</password>
     </server>
   </servers>
 </settings>
-
